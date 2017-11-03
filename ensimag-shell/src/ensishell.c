@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/wait.h>
 
 #include "variante.h"
 #include "readcmd.h"
@@ -131,6 +132,9 @@ int main() {
 					printf("%s\n",strerror(errno));
 					terminate(0);
 				}
+			}
+			else {
+				wait(&process);
 			}
 			// Affichage de la commande
 			printf("seq[%d]: ", i);
