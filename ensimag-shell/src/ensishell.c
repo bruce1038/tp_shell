@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #include "variante.h"
 #include "readcmd.h"
@@ -28,15 +29,15 @@
 int question6_executer(char *line)
 {
 	/* Question 6: Insert your code to execute the command line
-	 * identically to the standard execution scheme:
-	 * parsecmd, then fork+execvp, for a single command.
-	 * pipe and i/o redirection are not required.
+	  identically to the standard execution scheme:
+	  parsecmd, then fork+execvp, for a single command.
+	  pipe and i/o redirection are not required.
 	 */
 	printf("Not implemented yet: can not execute %s\n", line);
 
 	/* Remove this line when using parsecmd as it will free it */
 	free(line);
-	
+
 	return 0;
 }
 
@@ -103,12 +104,12 @@ int main() {
 
 		/* If input stream closed, normal termination */
 		if (!l) {
-		  
+
 			terminate(0);
 		}
-		
 
-		
+
+
 		if (l->err) {
 			/* Syntax error, read another command */
 			printf("error: %s\n", l->err);
@@ -119,13 +120,23 @@ int main() {
 		if (l->out) printf("out: %s\n", l->out);
 		if (l->bg) printf("background (&)\n");
 
-		/* Display each command of the pipe */
+
 		for (i=0; l->seq[i]!=0; i++) {
 			char **cmd = l->seq[i];
+			//Execution de la commande
+			pid_t process=fork();
+			if (process==0){
+				int retour=execvp(cmd[0],cmd);
+				if (retour==-1){
+					printf("%s\n",strerror(errno));
+					terminate(0);
+				}
+			}
+			// Affichage de la commande
 			printf("seq[%d]: ", i);
-                        for (j=0; cmd[j]!=0; j++) {
-                                printf("'%s' ", cmd[j]);
-                        }
+        for (j=0; cmd[j]!=0; j++) {
+                printf("'%s' ", cmd[j]);
+        }
 			printf("\n");
 		}
 	}
