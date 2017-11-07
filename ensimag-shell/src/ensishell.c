@@ -10,6 +10,7 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/wait.h>
+#include <sys/types.h>
 
 #include "variante.h"
 #include "readcmd.h"
@@ -27,6 +28,9 @@
 #if USE_GUILE == 1
 #include <libguile.h>
 
+void terminate(char *line);
+int commandes_internes(char**cmd);
+
 int question6_executer(char *line)
 {
 	/* Question 6: Insert your code to execute the command line
@@ -41,6 +45,54 @@ int question6_executer(char *line)
 
 	return 0;
 }
+
+/*Fonctions perso*/
+//Fonction qui execute une ligne de commande
+void execute_cmd(int bg, char **cmd){
+		if (commandes_internes(cmd)!=1){
+				pid_t process=fork();
+				if (process==0){
+						int flag=execvp(cmd[0],cmd);
+						if (flag==-1){
+								printf("%s\n",strerror(errno));
+								terminate(0);
+						}
+				}
+				else {
+						if (bg!=1){
+								wait(&process);
+						}
+				}
+		}
+}
+
+// Commandes internes
+int commandes_internes (char** cmd ){
+	int flag;
+	int pid;
+	int status;
+	//ligne de commande change directory ... Bonus
+	if(strcmp(cmd[0],"cd")==0 )
+	{
+			if(cmd[1])
+			{
+					flag=chdir(cmd[1]);
+					if(flag==-1) perror("Erreur de la commande chdir.");
+			}
+			else printf("Syntaxe : cd argument missing");
+			return 1;
+	}
+	//ligne de commande jobs
+	if( strcmp(cmd[0],"jobs")==0 )
+	{
+			pid=waitpid(-1,&status,WNOHANG);
+			printf("PID n°%d est dans l'état %d\n",pid,status);
+			return 1;
+	}
+	return 0;
+}
+
+/*Fin fonctions perso*/
 
 SCM executer_wrapper(SCM x)
 {
@@ -121,21 +173,10 @@ int main() {
 		if (l->out) printf("out: %s\n", l->out);
 		if (l->bg) printf("background (&)\n");
 
-
 		for (i=0; l->seq[i]!=0; i++) {
 			char **cmd = l->seq[i];
 			//Execution de la commande
-			pid_t process=fork();
-			if (process==0){
-				int retour=execvp(cmd[0],cmd);
-				if (retour==-1){
-					printf("%s\n",strerror(errno));
-					terminate(0);
-				}
-			}
-			else {
-				wait(&process);
-			}
+			execute_cmd(l->bg,cmd);
 			// Affichage de la commande
 			printf("seq[%d]: ", i);
         for (j=0; cmd[j]!=0; j++) {
