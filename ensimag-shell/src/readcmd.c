@@ -180,9 +180,9 @@ static char **split_in_words(char *line)
 		}
 		if (w) {
 			//traitement des caractères joker
+			char *p_tilde=strstr(w,"~");
 			char *p_star=strstr(w,"*");
 			char *p_brace=strstr(w,"{");
-			char *p_tilde=strstr(w,"~");
           if (p_star==NULL &&
 									p_brace==NULL &&
 										p_tilde==NULL){
@@ -196,7 +196,7 @@ static char **split_in_words(char *line)
 							int retour_glob;
 							if (p_star!=NULL)retour_glob=glob(w,0,NULL,&g);
 							if (p_brace!=NULL)retour_glob=glob(w,GLOB_BRACE,NULL,&g);
-							if (p_star!=NULL)retour_glob=glob(w,GLOB_TILDE,NULL,&g);
+							if (p_tilde!=NULL)retour_glob=glob(w,GLOB_TILDE,NULL,&g);
 							if (retour_glob==0){
 									for (int i=0;i<g.gl_pathc;i++) {
 										tab = xrealloc(tab, (l + 1) * sizeof(char *));
