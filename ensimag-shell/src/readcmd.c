@@ -194,9 +194,11 @@ static char **split_in_words(char *line)
 							//Contient un caractère joker
 							glob_t g;
 							int retour_glob;
-							if (p_star!=NULL)retour_glob=glob(w,0,NULL,&g);
-							if (p_brace!=NULL)retour_glob=glob(w,GLOB_BRACE,NULL,&g);
 							if (p_tilde!=NULL)retour_glob=glob(w,GLOB_TILDE,NULL,&g);
+							if (p_star!=NULL)retour_glob=glob(w,0,NULL,&g);
+							//TODO
+							//Association Tilde+Brace non-fonctionelle
+							if (p_brace!=NULL)retour_glob=glob(w,GLOB_BRACE,NULL,&g);
 							if (retour_glob==0){
 									for (int i=0;i<g.gl_pathc;i++) {
 										tab = xrealloc(tab, (l + 1) * sizeof(char *));
