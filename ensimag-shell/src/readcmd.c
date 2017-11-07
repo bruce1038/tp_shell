@@ -12,6 +12,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <string.h>
+#include <glob.h>
 #include "readcmd.h"
 
 static void memory_error(void)
@@ -156,7 +157,7 @@ static char **split_in_words(char *line)
 			cur++;
 			break;
 		case '&':
-		        w = "&";
+		  w = "&";
 			cur++;
 			break;
 		case '<':
@@ -178,8 +179,32 @@ static char **split_in_words(char *line)
 			w = strdup(buf);
 		}
 		if (w) {
-			tab = xrealloc(tab, (l + 1) * sizeof(char *));
-			tab[l++] = w;
+			//traitement des caractères joker
+			char *p_star=strstr(w,"*");
+			char *p_brace=strstr(w,"{");
+			char *p_tilde=strstr(w,"~");
+          if (p_star==NULL &&
+									p_brace==NULL &&
+										p_tilde==NULL){
+							//Ne contient pas de caractère joker
+							tab = xrealloc(tab, (l + 1) * sizeof(char *));
+							tab[l++] = w;
+				}
+					else{
+							//Contient un caractère joker
+							glob_t g;
+							int retour_glob;
+							if (p_star!=NULL)retour_glob=glob(w,0,NULL,&g);
+							if (p_brace!=NULL)retour_glob=glob(w,GLOB_BRACE,NULL,&g);
+							if (p_star!=NULL)retour_glob=glob(w,GLOB_TILDE,NULL,&g);
+							if (retour_glob==0){
+									for (int i=0;i<g.gl_pathc;i++) {
+										tab = xrealloc(tab, (l + 1) * sizeof(char *));
+										tab[l++]=strdup(g.gl_pathv[i]);
+									}
+							}
+							globfree(&g);
+					}
 		}
 	}
 	tab = xrealloc(tab, (l + 1) * sizeof(char *));
