@@ -189,7 +189,7 @@ static char **split_in_words(char *line)
 							//Ne contient pas de caractère joker
 							tab = xrealloc(tab, (l + 1) * sizeof(char *));
 							tab[l++] = w;
-				}
+					}
 					else{
 							//Contient un caractère joker
 							glob_t g;
