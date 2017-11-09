@@ -189,16 +189,16 @@ static char **split_in_words(char *line)
 							//Ne contient pas de caractère joker
 							tab = xrealloc(tab, (l + 1) * sizeof(char *));
 							tab[l++] = w;
-					}
+				}
 					else{
 							//Contient un caractère joker
 							glob_t g;
 							int retour_glob;
-							if (p_tilde!=NULL)retour_glob=glob(w,GLOB_TILDE,NULL,&g);
-							if (p_star!=NULL)retour_glob=glob(w,0,NULL,&g);
-							//TODO
-							//Association Tilde+Brace non-fonctionelle
-							if (p_brace!=NULL)retour_glob=glob(w,GLOB_BRACE,NULL,&g);
+							int opt=0;
+							if (p_tilde!=NULL)opt=opt|GLOB_TILDE;
+							if (p_brace!=NULL)opt=opt|GLOB_BRACE;
+
+							retour_glob=glob(w,opt,NULL,&g);
 							if (retour_glob==0){
 									for (int i=0;i<g.gl_pathc;i++) {
 										tab = xrealloc(tab, (l + 1) * sizeof(char *));

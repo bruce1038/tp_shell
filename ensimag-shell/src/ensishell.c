@@ -68,12 +68,11 @@ void execute_cmd(int bg, char **cmd){
 
 // Commandes internes
 int commandes_internes (char** cmd ){
-	int flag;
-	int pid;
-	int status;
+	//siginfo_t *status;
 	//ligne de commande change directory ... Bonus
 	if(strcmp(cmd[0],"cd")==0 )
 	{
+			int flag;
 			if(cmd[1])
 			{
 					flag=chdir(cmd[1]);
@@ -85,8 +84,7 @@ int commandes_internes (char** cmd ){
 	//ligne de commande jobs
 	if( strcmp(cmd[0],"jobs")==0 )
 	{
-			pid=waitpid(-1,&status,WNOHANG);
-			printf("PID n°%d est dans l'état %d\n",pid,status);
+			printf("Non ... là vraiment je vois pas comment faire");
 			return 1;
 	}
 	return 0;
